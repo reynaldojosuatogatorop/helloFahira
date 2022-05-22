@@ -1,0 +1,177 @@
+<div class="container over" style="padding:0 14px">
+	<div class="section">
+		<ul class="collection invoice-item transparent">
+			<div id="loadFetchCart"></div>
+		</ul>
+	</div>
+</div>
+<div id="modalPesananSaya" class="modal white dark-text modal-fixed-footer">
+	<div class="modal-content ">
+		<h4 class="bot-20 sec-tit">Daftar Pesanan</h4>
+
+		<div class="row">
+			<div class="input-field col s12">
+				<i class="mdi mdi-robot-vacuum-variant prefix active"></i>
+				<input id="nama_pemesan" type="text" readonly>
+				<label class="active" for="nama_pemesan">Nama Pemesan</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-field col s12">
+				<i class="mdi mdi-robot-vacuum-variant prefix active"></i>
+				<input id="harga_total" type="text" readonly>
+				<label class="active" for="harga_total">Harga Total</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-field col s12">
+				<i class="mdi mdi-calendar prefix active"></i>
+				<input id="tanggal_pengambilan" type="date" readonly>
+				<label class="active" for="tanggal_pengambilan">Tanggal Pengambilan</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-field col s12">
+				<i class="mdi mdi-clock prefix active"></i>
+				<input id="jam_pengambilan" type="time" readonly>
+				<label class="active" for="jam_pengambilan">Jam Pengambilan</label>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="input-field col s12">
+				<i class="mdi mdi-key prefix active"></i>
+				<input id="password_pemesan" type="text" readonly>
+				<label class="active" for="password_pemesan">Password Pemesan</label>
+			</div>
+		</div>
+
+		<div class="row ">
+			<div class="col s12 pad-0">
+				<h5 class="bot-20 sec-tit  ">Daftar Pesanan</h5>        
+				<table class="responsive-table ">
+					<thead>
+						<tr>
+							<th>Produk</th>
+							<th>Harga</th>
+							<th>Jumlah</th>
+						</tr>
+					</thead>
+					<tbody id="fetchDataCart">
+
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="row" align="center">
+			<div class="col s12 pad-0"> 
+				<button class="btn btn-small primary" onclick="transaksiSelesai()" id="btnTransaksiSelesai" style="color: white">Transaksi Selesai</button>    
+			</div>
+			<div class="col s12 pad-0"> 
+				<button class="btn btn-small red" onclick="closeModal()" style="color: white">Keluar</button>    
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		var idDetailPesanan = [];
+		var hitungCart;
+		var statusPesanan;
+		db.collection("pesanan")
+		.get()
+		.then((querySnapshot) => {
+
+			if (querySnapshot.size == 0) {
+				$("#loadFetchCart").append("<h5 align='center'>Pesanan masih kosong</h5>");
+				return;
+			}
+			querySnapshot.forEach((doc) => {
+				if (doc.exists) {
+
+					if(doc.data().status == "Selesai")
+					{
+						statusPesanan = 'teal lighten-1';
+						css = "white";
+					}else{
+						statusPesanan = 'text-primary';
+						css = "";
+					}
+					$("#loadFetchCart").append('<li class="collection-item avatar" style="padding-bottom:0"> <div class="row"> <div class="col s8"> <div class="item-det"><img src="https://toppng.com/uploads/preview/12-months-blue-check-mark-icon-11563057671d6e51m4dr7.png" alt="image" class="circle"><span class="title">'+doc.data().invoice+'</span> <p>Pemesan : '+doc.data().nama_pemesan+'</p><p>Password : '+doc.data().password_pemesan+'</p><p><button class="btn btn-small btn-primary" onclick="detailPesanan(`'+doc.id+'`,`'+window.btoa(JSON.stringify(doc.data()))+'`)">Detail</button></p></div></div><div class="col s8"> <div class="secondary-content"> <h6 style="color:'+css+'" class="top-0 '+statusPesanan+'">'+doc.data().status+'</h6> </div></div></div></li><hr>');
+				} else {
+					console.log("No such document!");
+				}
+			});
+		}) 
+		.catch((error) => {
+			console.log("Error getting documents: ", error);
+		});
+	</script>
+
+	<script type="text/javascript">
+		function detailPesanan(idToken,args)
+		{
+			var dataDecode = JSON.parse(window.atob(args));
+
+			$('#fetchDataCart').html("");
+			db.collection("cart").where("invoice", "==", dataDecode.invoice)
+			.get()
+			.then((querySnapshot) => {
+				querySnapshot.forEach((doc) => {
+
+					db.collection("produk").doc(doc.data().id_doc_produk).get().then((docCart) => {
+						if (docCart.exists) {
+							$("#fetchDataCart").append('<tr><td>'+docCart.data().nama_produk+'</td><td>'+docCart.data().harga+'</td><td>'+doc.data().jumlah+'</td></tr>');
+						} else {
+							console.log("No such document!");
+						}
+					}).catch((error) => {
+						console.log("Error getting document:", error);
+					});
+
+					
+				});
+			}) 
+			.catch((error) => {
+				console.log("Error getting documents: ", error);
+			});
+
+			$("#btnTransaksiSelesai").attr("onclick","transaksiSelesai('"+idToken+"')");
+
+			$('#nama_pemesan').val(dataDecode.nama_pemesan);
+			$('#tanggal_pengambilan').val(dataDecode.tanggal_pengambilan);
+			$('#jam_pengambilan').val(dataDecode.jam_pengambilan);
+			$('#password_pemesan').val(dataDecode.password_pemesan);
+			$('#harga_total').val(formatRupiah(dataDecode.harga_total));
+
+			$('#modalPesananSaya').modal();
+			$('#modalPesananSaya').modal('open'); 
+
+		}
+
+		function closeModal()
+		{
+			$('#modalPesananSaya').modal();
+			$('#modalPesananSaya').modal('close'); 
+		}
+	</script>
+	<script type="text/javascript">
+		$("#menu-pesanan").addClass("active");
+	</script>
+
+	<script type="text/javascript">
+		function transaksiSelesai(args)
+		{
+			const data = {
+				'status' :"Selesai",
+			}
+			db.collection("pesanan").doc(args).update(data)
+			.then((docRef) => {
+				swal("Berhasil", "Status Telah diperbaharui dan transaksi telah selesai", "success").then((value) => {
+					location.reload(true);
+				});
+			})
+			.catch((error) => {
+				console.error("Error adding document: ", error);
+			});
+		}
+	</script>

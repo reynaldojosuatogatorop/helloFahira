@@ -1,0 +1,148 @@
+<div class="container over">
+    <div class="section">
+        <ul class="collection invoice-item transparent">
+            <div id="loadFetchCart"></div>
+            <li class="collection-item non-avatar total">
+                <div class="item-det">
+                    <h6 class="">Total Belanja</h6>
+                </div>
+                <div class="secondary-content">
+                    <h5 class="top-0" id="totalHarga">Loading...</h5>
+                </div>
+            </li>
+        </ul>
+        <div class="center"><a href="javascript:tampilCheckout()" id="btnCheckout" class="waves-effect waves-light btn-large bg-primary ">Checkout</a> &nbsp;<a href="index.html" class="waves-effect waves-light btn-large bg-primary pink lighten-2">Continue Shopping</a></div>
+    </div>
+</div>
+
+<!-- MODAL DATA -->
+<div id="modalCheckout" class="modal white dark-text modal-fixed-footer">
+  <div class="modal-content ">
+    <h4 class="bot-20 sec-tit">ISI PROFIL PEMESAN</h4>
+
+    <div class="row">
+        <div class="input-field col s12">
+            <i class="mdi mdi-robot-vacuum-variant prefix"></i>
+            <input id="nama_pemesan" type="text" class="validate">
+            <label for="nama_pemesan">Nama Pemesan</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="input-field col s12">
+            <i class="mdi mdi-calendar prefix"></i>
+            <input id="tanggal_pengambilan" type="date" class="validate">
+            <label for="tanggal_pengambilan">Tanggal Pengambilan</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="input-field col s12">
+            <i class="mdi mdi-clock prefix"></i>
+            <input id="jam_pengambilan" type="time" class="validate">
+            <label for="jam_pengambilan">Jam Pengambilan</label>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="input-field col s12">
+            <i class="mdi mdi-key prefix"></i>
+            <input id="password_pemesan" type="text" class="validate">
+            <label for="password_pemesan">Password Pemesan</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s12 pad-0">
+            <button onclick="checkout()" class="waves-effect waves-light btn-small primary lighten-2" style="color: white">Checkout</button>    
+            <a href="#!" class="btn btn-small red" style="color: white">Batal</a>    
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var idDetailPesanan = [];
+    var hitungCart;
+    var hargaTotal = 0;
+    db.collection("cart").where("id_doc_users", "==", localStorage.getItem("loginSessionID")).where('status','==','Keranjang')
+    .get()
+    .then((querySnapshot) => {
+
+        if (querySnapshot.size == 0) {
+            $('#btnCheckout').hide();
+            $("#loadFetchCart").append("<h5 align='center'>Keranjang masih kosong</h5>");
+        }else{
+            $('#btnCheckout').show();
+        }
+        querySnapshot.forEach((doc) => {
+            var docRef = db.collection("produk").doc(doc.data().id_doc_produk);
+            idDetailPesanan.push(doc.id);
+            docRef.get().then((docs) => {
+                if (docs.exists) {
+                    $("#loadFetchCart").append(' <li class="collection-item avatar"> <div class="item-det"><img src="'+docs.data().gambar+'" alt="image" class="circle"><span class="title">'+docs.data().nama_produk+'</span> <p>Jumlah : '+doc.data().jumlah+'</p></div><div class="secondary-content"> <h6 class="top-0 ">'+formatRupiah(doc.data().harga)+'</h6> </div></li>');
+                    hargaTotal = parseInt(hargaTotal) + parseInt(doc.data().harga);
+                } else {
+                    console.log("No such document!");
+                }
+
+                $('#totalHarga').html(formatRupiah(hargaTotal));
+            }).catch((error) => {
+                console.log("Error getting document:", error);
+            });
+        });
+    }) 
+    .catch((error) => {
+        console.log("Error getting documents: ", error);
+    });
+</script>
+
+<script type="text/javascript">
+
+</script>
+
+<script type="text/javascript">
+    function tampilCheckout()
+    {
+        $('#modalCheckout').modal();
+        $('#modalCheckout').modal('open'); 
+    }
+
+    function checkout()
+    {
+        var m = new Date();
+        var dateString =
+        m.getUTCFullYear() +
+        ("0" + (m.getUTCMonth()+1)).slice(-2) +
+        ("0" + m.getUTCDate()).slice(-2)+
+        ("0" + m.getUTCHours()).slice(-2) +
+        ("0" + m.getUTCMinutes()).slice(-2) +
+        ("0" + m.getUTCSeconds()).slice(-2);
+
+        var invoice = dateString+Math.floor(Math.random() * 101);
+        const data = {
+            'invoice'               : invoice,
+            'id_doc_users'          : localStorage.getItem("loginSessionID"),
+            'nama_pemesan'          : $('#nama_pemesan').val(),
+            'tanggal_pengambilan'   : $('#tanggal_pengambilan').val(),
+            'jam_pengambilan'       : $('#jam_pengambilan').val(),
+            'password_pemesan'      : $('#password_pemesan').val(),
+            'status'                : 'Dipesan',
+            'harga_total'           : hargaTotal
+        }
+
+        const dataDetail = {
+            'invoice'  : data.invoice,
+            'status'  : 'Dipesan'  
+        }
+
+
+        db.collection("pesanan").add(data)
+        .then((docRef) => {
+            idDetailPesanan.forEach(function myFunction(item, index) {
+               db.collection("cart").doc(item).update(dataDetail);
+           });
+            swal("Berhasil", "Pesanan berhasil dibuat, silahkan cek di menu pesanan", "success").then((value) => {
+              location.reload(true);
+          });
+        })
+        .catch((error) => {
+            console.error("Error adding document: ", error);
+        });
+    }
+</script>

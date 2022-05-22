@@ -1,0 +1,94 @@
+<div class="container over">
+    <div class="section">
+        <div class="row ">
+            <div class="col s12 pad-0">
+                <h5 class="bot-20 sec-tit  ">Tambah Data Produk</h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <i class="mdi mdi-robot-vacuum-variant prefix"></i>
+                <input id="nama_produk" type="text" class="validate">
+                <label for="nama_produk">Nama Produk</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <i class="mdi mdi-deskphone prefix"></i>
+                <input id="harga" type="text" class="validate">
+                <label for="harga">Harga</label>
+            </div>
+        </div>
+        <div class="row" style="margin-bottom: 0;">
+            <p>
+                <label>
+                    <input type="radio" name="group1" id="status_ketersediaan" />
+                    <span>Tersedia</span>
+                </label>
+                <label>
+                    <input type="radio" name="group1" id="status_ketersediaan" />
+                    <span>Habis</span>
+                </label>
+            </p>
+        </div>
+        <div class="row">
+            <div class="input-field col s12 textarea">
+                <i class="mdi mdi-pencil prefix"></i>
+                <textarea id="deskripsi" class="materialize-textarea"></textarea>
+                <label for="textarea-prefix">Deskripsi Produk</label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row ">
+    <div class="col s12 pad-0">
+        <h5 class="bot-20 sec-tit  ">Upload Gambar</h5>
+        <div class="pad-15">
+            <div class="row">
+                <div class="file-field col input-field s12">
+                    <div class="btn deep-purple lighten-2">
+                        <span>File</span>
+                        <input type="file" multiple id="gambar">
+                    </div>
+                    <div class="file-path-wrapper">
+                        <input class="file-path validate" type="text" placeholder="Upload one or more files">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" align="center">
+                <div class="col">
+                    <img src="" id="display" style="max-width: 50%;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" align="center">
+    <div class="col s12 pad-0">
+        <button class="waves-effect waves-light btn deep-purple lighten-2" onclick="simpanDataProduk()"><i class="mdi mdi-content-save right"></i>Simpan</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var gambar;
+    document.getElementById("gambar").onchange = function(e) {
+      var file = document.getElementById("gambar").files[0];
+      var reader = new FileReader();
+      reader.onload = function() {
+        console.log(reader.result);
+        gambar = reader.result;
+        document.getElementById("display").src = reader.result;
+        var blob = window.dataURLtoBlob(reader.result);
+        console.log(blob, new File([blob], "image.png", {
+          type: "image/png"
+      }));
+    };
+    reader.readAsDataURL(file);
+};
+</script>
+
+<script type="text/javascript">
+    $("#menu-masterData").addClass("active");
+</script>

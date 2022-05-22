@@ -1,0 +1,149 @@
+
+    <li class="lvl1 ">
+        <div class=" waves-effect   ui-app-products-home ">
+            <a href="sub-interface.html">
+                <i class="mdi mdi-arrange-send-to-back"></i>
+                <span class="title">Pesanan</span>
+            </a>
+
+        </div>
+    </li>
+    
+
+<div id="modalCheckout" class="modal white dark-text modal-fixed-footer">
+  <div class="modal-content ">
+    <h4 class="bot-20 sec-tit">Perbaharui Profil</h4>
+
+    <div class="row">
+      <div class="input-field col s10 offset-s1">
+        <input id="email_perbaharui_profil" type="email" class="validate">
+        <label for="email_perbaharui_profil" class="active">Email</label>
+    </div>
+</div>
+
+<div class="row">
+  <div class="input-field col s10 offset-s1">
+    <input id="password_users_perbaharui_profil" type="text" class="validate">
+    <label for="password" class="active">Password</label>
+</div>
+</div>
+
+<div class="row">
+  <div class="input-field col s10 offset-s1">
+    <input id="nama_perbaharui_profil" type="text" class="validate">
+    <label for="nama_perbaharui_profil" class="active">Nama</label>
+</div>
+</div> 
+
+<div class="row">
+  <div class="input-field col s10 offset-s1">
+    <input id="nomor_telepon_perbaharui_profil" type="text" class="validate">
+    <label for="nomor_telepon_perbaharui_profil" class="active">Nomor Telepon</label>
+</div>
+</div>
+<div class="row" style="margin-bottom: 0;">
+  <div class="input-field col s10 offset-s1" style="border-radius: 10px;">
+    <input id="alamat_perbaharui_profil" type="text" class="validate" style="height: 10vh; ">
+    <label for="alamat" class="active">Alamat Lengkap</label>
+</div>
+</div>
+
+<div class="row">
+  <div class="col s10 offset-s1">
+    <p>
+      <label>
+        <input type="radio" id="laki_laki_perbaharui_profil" value="Laki-Laki" name="jenis_kelamin"  />
+        <span>Laki-Laki</span>
+    </label>
+</p>
+<p>
+  <label>
+    <input type="radio" id="perempuan_perbaharui_profil" value="Perempuan" name="jenis_kelamin"  />
+    <span>Perempuan</span>
+</label>
+</p>
+</div>
+</div>
+    <div class="row ">
+        <div class="col s12 pad-0">
+            <h5 class="bot-20 sec-tit">Upload Gambar</h5>
+            <div class="pad-15">
+                <div class="row">
+                    <div class="file-field col input-field s12">
+                        <div class="btn deep-purple lighten-2">
+                            <span>File</span>
+                            <input type="file" multiple id="gambar_perbaharui_profil">
+                        </div>
+                        <div class="file-path-wrapper">
+                            <input class="file-path validate" type="text" placeholder="Upload one or more files">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" align="center">
+                    <div class="col">
+                        <img src="" id="display" style="max-width: 50%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="row" align="center">
+    <div class="col s6 pad-0">
+        <button id="btnPerbaharuiProfil" class="waves-effect waves-light btn-small primary lighten-2" style="color: white">Perbaharui</button>   
+    </div>
+
+    <div class="col s4 pad-0">
+        <a href="#!" class="btn btn-small red" style="color: white">Batal</a>    
+    </div>
+</div>
+</div>
+
+<script type="text/javascript">
+    var gambarPerbaharuiProfil;
+    document.getElementById("gambar_perbaharui_profil").onchange = function(e) {
+      var file = document.getElementById("gambar_perbaharui_profil").files[0];
+      var reader = new FileReader();
+      reader.onload = function() {
+        console.log(reader.result);
+        gambarPerbaharuiProfil = reader.result;
+        document.getElementById("display").src = reader.result;
+        var blob = window.dataURLtoBlob(reader.result);
+        console.log(blob, new File([blob], "image.png", {
+          type: "image/png"
+      }));
+    };
+    reader.readAsDataURL(file);
+};
+</script>
+<script type="text/javascript">
+    function perbaharuiProfil(args)
+    {
+        var jenisKelamin;
+    if ($('#perempuan_perbaharui_profil').is(':checked')) {
+        jenisKelamin = "Perempuan";
+    }else{
+        jenisKelamin = "Laki-Laki";
+    }
+
+
+        const data = {
+            'nama'          : $('#nama_perbaharui_profil').val(),
+            'email'         : $('#email_perbaharui_profil').val(),
+            'users_pass'     : $('#password_users_perbaharui_profil').val(),
+            'nomor_telepon' : $('#nomor_telepon_perbaharui_profil').val(),
+            'alamat'        : $('#alamat_perbaharui_profil').val(),
+            'jenis_kelamin' : jenisKelamin,
+            'gambar'        : gambarPerbaharuiProfil
+        }
+        db.collection("users").doc(args).update(data)
+        .then((docRef) => {
+            swal("Berhasil", "Profil anda berhasil diperbaharui, silahkan logout dan login kembali", "success").then((value) => {
+                location.reload(true);
+            });
+        })
+        .catch((error) => {
+            console.error("Error adding document: ", error);
+        });
+    }
+</script>

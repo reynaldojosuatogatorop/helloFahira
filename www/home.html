@@ -1,0 +1,62 @@
+<div class="section">
+    <div class="spacer"></div>
+    <div class="row mt0">
+        <div class="col s12 pad-0">
+            <h5 class="bot-20 sec-tit">Katalog Produk</h5>
+            <div class="spacer"></div>
+            <div class="row ui-mediabox  prods">
+                <div id="katalogProdukFetchData"></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    db.collection("produk")
+    .get()
+    .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+
+            if(doc.data().status_ketersediaan == 'Tersedia' || doc.data().status_ketersediaan == 'on')
+            {
+                statusSedia = 'Tersedia';
+            }else{
+                statusSedia = 'Habis';
+            }
+            $("#katalogProdukFetchData").append('<div class="col s6 "> <div class="prod-img-wrap" align="center"> <a class="img-wrap" href="'+doc.data().gambar+'" data-fancybox="images" data-caption="Home Decor Balls"> <img alt="image" class="" style="width: 52px; height: 100px;" src="'+doc.data().gambar+'"> </a> </div><div class="prod-info"><a href="?detail-produk=detail"> <h5 class="title truncate">'+doc.data().nama_produk+'</h5> </a> <span class="small brand">'+statusSedia+'</span> <div class="spacer-line"></div><h5 class="bot-0 price">'+formatRupiah(doc.data().harga)+'</h5> <div class="spacer-line"></div><div class="spacer-line"></div><a href="javascript:addToCart(`'+doc.id+'`,`'+window.btoa(JSON.stringify(doc.data()))+'`)"><span class="addtocart btn-small">Add to cart</span></a> <div class="spacer-line"></div><div class="spacer"></div><div class="divider"></div><div class="spacer"></div></div></div>');
+        });
+    }) 
+    .catch((error) => {
+        console.log("Error getting documents: ", error);
+    });
+</script>
+
+<script type="text/javascript">
+    function addToCart(idTokenCart, args)
+    {
+
+        const sessionDecrypt = localStorage.getItem("loginSessionID");
+        var dataDecode = JSON.parse(window.atob(args));
+        const data = {
+            'id_doc_produk' : idTokenCart,
+            'harga'         : dataDecode.harga,
+            'jumlah'        : 1,
+            'id_doc_users'  : sessionDecrypt,
+            'status'        : 'Keranjang'
+        }
+        db.collection("cart").add(data)
+        .then((docRef) => {
+            swal("Berhasil", "Produk berhasil ditambahkan kedalam keranjang", "success").then((value) => {
+              location.reload(true);
+          });
+        })
+        .catch((error) => {
+            console.error("Error adding document: ", error);
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    $("#menu-home").addClass("active");
+</script>
